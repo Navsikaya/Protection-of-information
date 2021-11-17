@@ -1,0 +1,154 @@
+//#pragma comment(lib, "ws2_32.lib")
+#include <stdio.h>
+#include <winsock2.h>
+#include <windows.h>
+#include <iostream>
+#define MY_PORT 301 
+
+//#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
+#define PRINTNUSERS if (nclients) printf("%d Пользователей в сети\n",nclients);else printf("Пользователь не в сети\n");
+
+DWORD WINAPI ToClient(LPVOID client_socket);
+
+SOCKET client_socket; // сокет для клиента
+sockaddr_in client_addr; // адрес клиента (заполняется системой)
+
+
+int nclients = 0;
+SOCKET my_sock[100];
+
+
+struct MyStruct
+{
+	SOCKET param1;
+	char* param2;
+};
+
+
+int main(int argc, char* argv[])
+{
+	setlocale(LC_ALL, "Russian");
+	char bufff[1024];
+	printf("TCP Сервер\n");
+
+	if (WSAStartup(0x0202, (WSADATA*)&bufff[0]))
+	{
+
+		printf("Ошибка WSAStartup %d\n", WSAGetLastError());
+		return -1;
+	}
+
+	SOCKET mysocket;
+
+	if ((mysocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+
+		printf("Ошибка socket %d\n", WSAGetLastError());
+		WSACleanup(); // Деиницилизация библиотеки Winsock
+		return -1;
+	}
+
+	sockaddr_in local_addr;
+	local_addr.sin_family = AF_INET;
+	local_addr.sin_port = htons(MY_PORT);
+	local_addr.sin_addr.s_addr = 0;
+
+	if (bind(mysocket, (sockaddr*)&local_addr, sizeof(local_addr)))
+	{
+
+		printf("Ошибка bind %d\n", WSAGetLastError());
+		closesocket(mysocket);
+		WSACleanup();
+		return -1;
+	}
+
+
+	if (listen(mysocket, 0x100))
+	{
+
+		printf("Ошибка listen %d\n", WSAGetLastError());
+		closesocket(mysocket);
+		WSACleanup();
+		return -1;
+	}
+	printf("Ожидание подключений…\n");
+
+
+
+	int client_addr_size = sizeof(client_addr);
+
+	while ((client_socket = accept(mysocket, (sockaddr*)&client_addr, &client_addr_size)))
+	{
+		nclients++; 
+		my_sock[nclients - 1] = client_socket;
+
+		HOSTENT* hst;
+		hst = gethostbyaddr((char*)&client_addr.sin_addr.s_addr, 4, AF_INET);
+
+		printf("+%s [%s] Новое подключение!\n", (hst) ? hst->h_name : "", inet_ntoa(client_addr.sin_addr));
+		PRINTNUSERS
+
+			struct MyStruct mystr;
+
+		mystr.param1 = client_socket;
+		mystr.param2 = (char*)malloc(sizeof(MyStruct));
+		DWORD thID;
+		CreateThread(NULL, NULL, ToClient, &mystr, NULL, &thID);
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+void g(char* buffff, int bytes_recvv) {
+	for (int i = 0; i < nclients; i++) {
+		send(my_sock[i], &buffff[0], bytes_recvv, 0);
+
+	}
+}
+
+
+DWORD WINAPI ToClient(LPVOID B)
+{
+	struct MyStruct* p_mystr = (MyStruct*)B;
+	char* buff = p_mystr->param2;              //или так char * buff = (*p_mystr).param2;
+	SOCKET client_socket = p_mystr->param1;
+
+	
+	free(buff);
+
+
+  #define sHELLO "Ура, у вас получилось!\r\n"
+		
+
+	send(client_socket, sHELLO, sizeof(sHELLO), 0);
+	
+
+
+	int bytes_recv = 0;
+
+		while ((bytes_recv = recv(client_socket, &buff[0], sizeof(buff), 0)) && bytes_recv != SOCKET_ERROR)
+	{
+
+	
+		g(&buff[0], bytes_recv);
+
+		for (int i = 0; i < sizeof(buff); i++)
+		{
+			buff[i] = '\0';
+		}
+		
+	}
+
+	nclients--;
+	printf("Отключение\n"); PRINTNUSERS
+
+		closesocket(my_sock[nclients]);
+
+	return 0;
+}
