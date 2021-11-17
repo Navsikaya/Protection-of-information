@@ -1,4 +1,26 @@
 import  socket
+import  threading
+
+def start_server():
+    while True:
+        user_socket, addres = servet.accept()
+        user_socket.send("Вы подключены!".encode())
+        print(f"Пользователь {addres[0]} Подключился")
+        users.append(user_socket)
+        user_listen_appect=threading.Thread(target=user_listen,args=(user_socket,))
+        #user_listen(user_socket)
+        user_listen_appect.start()
+
+def all_send_message(data):
+    for user in users:
+        user.send(data)
+
+def user_listen(user):
+    while True:
+        data = user.recv(1024)
+        print(f"User {data}")
+        all_send_message(data)
+
 
 servet = socket.socket(
     socket.AF_INET,
@@ -11,9 +33,7 @@ servet.bind(
 servet.listen(5)
 print("Сервер Старт!")
 
-while True:
-    user_socket,addres=servet.accept()
-    user_socket.send("Вы подключены!".encode())
-   #print(f"Пользователь  Подключился")
-    data=user_socket.recv(1024)
-    print(data.decode("utf-8"))
+users=[]
+
+if __name__ =='__main__':
+    start_server()
