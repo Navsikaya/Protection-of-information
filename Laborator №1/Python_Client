@@ -1,0 +1,32 @@
+import  socket
+from threading import Thread
+
+
+def send_server():
+    listen_thred=Thread(target=lissten_server)
+    listen_thred.start()
+    while True:
+        client.send(input("Вы: ").encode("utf-8"))
+
+
+
+
+def lissten_server():
+    while True:
+        data = client.recv(1024)
+        print(data.decode("utf-8"))
+
+
+
+client =socket.socket(
+    socket.AF_INET,
+    socket.SOCK_STREAM,
+)
+client.connect(
+
+    ("127.0.0.1",700)
+
+)
+
+if __name__=='__main__':
+    send_server()
