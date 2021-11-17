@@ -1,0 +1,19 @@
+import  socket
+
+servet = socket.socket(
+    socket.AF_INET,
+    socket.SOCK_STREAM,
+)
+servet.bind(
+    ("127.0.0.1",700)  # localhost
+)
+
+servet.listen(5)
+print("Сервер Старт!")
+
+while True:
+    user_socket,addres=servet.accept()
+    user_socket.send("Вы подключены!".encode())
+   #print(f"Пользователь  Подключился")
+    data=user_socket.recv(1024)
+    print(data.decode("utf-8"))
