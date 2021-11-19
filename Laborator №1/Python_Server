@@ -1,5 +1,15 @@
 import  socket
 import  threading
+import DH_code
+import json
+
+
+
+
+
+
+   # gg=data_g["g"][0]
+    #print("gg="+gg)
 
 def start_server():
     while True:
@@ -7,6 +17,13 @@ def start_server():
         user_socket.send("Вы подключены!".encode())
         print(f"Пользователь {addres[0]} Подключился")
         users.append(user_socket)
+        print("11111")
+        data_g = user_socket.recv(1024)
+        print("CRASH")
+        data_g = json.loads(data_g.decode())
+        g = data_g.get("g")
+        p = data_g.get("p")
+        print("g = " , g , "p =" , p)
         user_listen_appect=threading.Thread(target=user_listen,args=(user_socket,))
         #user_listen(user_socket)
         user_listen_appect.start()
@@ -16,6 +33,7 @@ def all_send_message(data):
         user.send(data)
 
 def user_listen(user):
+
     while True:
         data = user.recv(1024)
         print(f"User {data}")
@@ -36,4 +54,5 @@ print("Сервер Старт!")
 users=[]
 
 if __name__ =='__main__':
+
     start_server()
