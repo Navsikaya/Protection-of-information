@@ -15,15 +15,33 @@ import json
 
 def send_server():
 
-    listen_thred=Thread(target=lissten_server)
-    listen_thred.start()
+
     g = 3
     p = 17
-    # p=[17]
+
     data = json.dumps({"g": g, "p": p})
     print("Шя отправлю")
     client.send(data.encode("utf-8"))
     print("Отпрвил")
+
+    #A_private = randint(0, 100000)
+    #Alica = DH_code.DH_Endpoint(g, p, A_private)
+    A_secret = randint(0, 100000)
+    A_public = (g ** A_secret) % p
+    data_A = json.dumps({"Alica": A_public})
+    client.send(data_A.encode("utf-8"))
+    listen_thred = Thread(target=lissten_server)
+    listen_thred.start()
+
+    Bob = client.recv(1024)
+    Bob1 = json.loads(Bob.decode())
+    Bob_a = Bob1.get("Bob")
+    print("Bob public", Bob_a)
+
+
+    A_key=(Bob_a**A_secret)%p
+    print("key = ",A_key)
+
 
     while True:
         client.send(input("Вы: ").encode("utf-8"))
