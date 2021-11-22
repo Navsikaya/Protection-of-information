@@ -72,7 +72,7 @@ client =socket.socket(
 )
 
 ip_i=input("Вветите ip сервера")
-port=input("Вветите ip сервера")
+port=int(input("Вветите Port"))
 
 client.connect(
 
