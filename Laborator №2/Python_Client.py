@@ -1,17 +1,21 @@
 import  socket
-import pickle
+import string
 from threading import Thread
-import  DH_code
 from  random import randint
 import json
+#from __future__ import print_function
+from string import ascii_lowercase
 
+#SYMBOLTABLE = list(ascii_lowercase)
+SYMBOLTABLE = list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~")
 
-def encrypt_message(message,A_key):
-    encrypted_message = ""
-    key = A_key
-    for c in message:
-        encrypted_message += chr(ord(c) + key)
-    return encrypted_message
+def move2front_encode(strng, symboltable):
+    sequence, pad = [], symboltable[::]
+    for char in strng:
+        indx = pad.index(char)
+        sequence.append(indx)
+        pad = [pad.pop(indx)] + pad
+    return sequence
 
 
 def send_server():
@@ -48,9 +52,11 @@ def send_server():
 
     while True:
         message=input("Вы: ")
-        ll=encrypt_message(message,A_key)
+        ll=move2front_encode(message,SYMBOLTABLE)
+        #ll=encrypt_message(message,A_key)
         print(ll)
-        client.send(ll.encode("utf-8"))
+
+        client.send(bytes(ll))
 
 
 

@@ -1,18 +1,22 @@
 import  socket
 import  threading
-import DH_code
+
 import json
 from  random import randint
 
+#from __future__ import print_function
+from string import ascii_lowercase
 
-def decrypt_message(encrypted_message,B_key):
-    decrypted_message = ""
-    key = B_key
-    for c in encrypted_message:
-        decrypted_message += chr(c - key)
-    return decrypted_message
+#SYMBOLTABLE = list(ascii_lowercase)
+SYMBOLTABLE = list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~")
 
-
+def move2front_decode(sequence, symboltable):
+    chars, pad = [], symboltable[::]
+    for indx in sequence:
+        char = pad[indx]
+        chars.append(char)
+        pad = [pad.pop(indx)] + pad
+    return ''.join(chars)
 
 def start_server():
     while True:
@@ -55,7 +59,8 @@ def user_listen(user,B_key):
     while True:
         data = user.recv(1024)
         print(data)
-        ll1=decrypt_message(data,B_key)
+        ll1=move2front_decode(data,SYMBOLTABLE)
+        #ll1=decrypt_message(data,B_key)
         print(f"User {ll1}")
         all_send_message(ll1)
 
